@@ -3,7 +3,7 @@ use crate::{consts::*, player::Player};
 use crate::game_state::GameState;
 
 #[derive(Component)]
-pub struct Bullet;
+pub struct PlayerBullet;
 
 #[derive(Resource)]
 pub struct FireState {
@@ -63,14 +63,14 @@ fn spawn_bullet(commands: &mut Commands, player_pos: Vec3) {
             transform: Transform::from_xyz(player_pos.x, muzzle_y, 0.0),
             ..default()
         },
-        Bullet,
+        PlayerBullet,
     ));
 }
 
 fn move_and_gc_bullets(
     time: Res<Time>,
     mut commands: Commands,
-    mut q: Query<(Entity, &mut Transform), With<Bullet>>,
+    mut q: Query<(Entity, &mut Transform), With<PlayerBullet>>,
 ) {
     let half_h = WIN_H * 0.5;
 

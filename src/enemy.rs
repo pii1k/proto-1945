@@ -97,11 +97,11 @@ fn spawn_enemy_waves(
 
 fn spawn_one_enemy(commands: &mut Commands, pos: Vec3, kind: MotionKind) {
 
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     let mut shooter = EnemyShooter {
         timer: Timer::from_seconds(ENEMY_FIRE_COOLDOWN_SEC, TimerMode::Repeating),
     };
-    let jitter = rng.gen_range(0.0..ENEMY_FIRE_COOLDOWN_SEC);
+    let jitter = rng.random_range(0.0..ENEMY_FIRE_COOLDOWN_SEC);
     shooter.timer.set_elapsed(std::time::Duration::from_secs_f32(jitter));
 
 

@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use crate::{consts::*, bullet::Bullet, enemy::{Enemy, EnemyBullet}, player::Player};
+use crate::{consts::*, bullet::PlayerBullet, enemy::{Enemy, EnemyBullet}, player::Player};
 use crate::game_state::GameState;
 
 pub struct CollisionPlugin;
@@ -11,17 +11,16 @@ impl Plugin for CollisionPlugin {
             (
                 bullet_enemy_collisions,
                 player_enemy_collisions,
-                player_enemybullet_collisions, // 🔽 추가
+                player_enemybullet_collisions,
             )
             .run_if(in_state(GameState::Playing)),
         );
     }
 }
 
-// 기존: 탄 ↔ 적
 fn bullet_enemy_collisions(
     mut commands: Commands,
-    q_bullets: Query<(Entity, &Transform), With<Bullet>>,
+    q_bullets: Query<(Entity, &Transform), With<PlayerBullet>>,
     q_enemies: Query<(Entity, &Transform), With<Enemy>>,
 ) {
     let half_b = BULLET_SIZE * 0.5;
@@ -40,7 +39,6 @@ fn bullet_enemy_collisions(
     }
 }
 
-// 기존: 플레이어 ↔ 적 (직접 충돌)
 fn player_enemy_collisions(
     mut commands: Commands,
     q_player: Query<(Entity, &Transform), With<Player>>,
@@ -64,7 +62,6 @@ fn player_enemy_collisions(
     }
 }
 
-// 🔽 새로 추가: 플레이어 ↔ 적 탄 충돌
 fn player_enemybullet_collisions(
     mut commands: Commands,
     q_player: Query<(Entity, &Transform), With<Player>>,
@@ -80,7 +77,7 @@ fn player_enemybullet_collisions(
             let b_pos = b_t.translation.truncate();
             if aabb_overlap(p_pos, half_p, b_pos, half_b) {
                 commands.entity(p_ent).despawn();
-                commands.entity(b_ent).despawn(); // 탄 제거
+                commands.entity(b_ent).despawn();
                 next_state.set(GameState::GameOver);
                 break;
             }

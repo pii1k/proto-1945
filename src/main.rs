@@ -3,15 +3,15 @@ mod player;
 mod bullet;
 mod enemy;
 mod collision;
-mod game_state; // ← 추가
+mod game_state; 
 
 use bevy::prelude::*;
-use bevy::math::primitives::{RegularPolygon, Circle};              // 재스폰용
-use bevy::sprite::MaterialMesh2dBundle;                             // 재스폰용
+use bevy::math::primitives::{RegularPolygon, Circle};              
+use bevy::sprite::MaterialMesh2dBundle;                             
 use crate::consts::*;
 use crate::player::{Player, PlayerPlugin};
-use crate::bullet::{Bullet, BulletPlugin, FireState};
-use crate::enemy::{Enemy, EnemyPlugin, EnemySpawnTimer};
+use crate::bullet::{PlayerBullet, BulletPlugin, FireState};
+use crate::enemy::{Enemy, EnemyBullet,EnemyPlugin, EnemySpawnTimer};
 use crate::collision::CollisionPlugin;
 use crate::game_state::GameState;
 
@@ -55,20 +55,20 @@ fn restart_on_r(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
-    q_bullets: Query<Entity, With<Bullet>>,
-    q_enemies: Query<Entity, With<Enemy>>,
     q_players: Query<Entity, With<Player>>,
+    q_player_bullets: Query<Entity, With<PlayerBullet>>,
+    q_enemies: Query<Entity, With<Enemy>>,
+    q_enemy_bullets: Query<Entity, With<EnemyBullet>>,
     mut fire: ResMut<FireState>,
     mut enemy_timer: ResMut<EnemySpawnTimer>,
 ) {
     if !kb.just_pressed(KeyCode::KeyR) { return; }
 
-    // 1) 월드 정리
-    for e in q_bullets.iter() { commands.entity(e).despawn(); }
-    for e in q_enemies.iter() { commands.entity(e).despawn(); }
     for e in q_players.iter() { commands.entity(e).despawn(); }
+    for e in q_player_bullets.iter() { commands.entity(e).despawn(); }
+    for e in q_enemies.iter() { commands.entity(e).despawn(); }
+    for e in q_enemy_bullets.iter() { commands.entity(e).despawn(); }
 
-    // 2) 플레이어 재스폰 (player.rs와 동일 로직)
     let triangle = Mesh::from(RegularPolygon {
         sides: 3,
         circumcircle: Circle { radius: PLAYER_RADIUS },
@@ -83,12 +83,10 @@ fn restart_on_r(
         Player,
     ));
 
-    // 3) 타이머 리셋/프라임
     fire.timer.reset();
     let d = fire.timer.duration();
-    fire.timer.set_elapsed(d); // 재시작 직후 홀드 시 즉시 발사
+    fire.timer.set_elapsed(d); 
     enemy_timer.timer.reset();
 
-    // 4) 상태 전환
     next.set(GameState::Playing);
 }
